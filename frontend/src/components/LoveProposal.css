@@ -1,7 +1,8 @@
 .proposal-container {
   min-height: 100vh;
-  height: 100vh;
+  height: auto;
   overflow-y: auto;
+  overflow-x: hidden;
   background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%);
   display: flex;
   flex-direction: column;
@@ -9,11 +10,16 @@
   justify-content: center;
   padding: 20px 20px 80px 20px;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .proposal-card {
   max-width: 600px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
 }
 
 .proposal-title {
@@ -21,6 +27,8 @@
   color: #ff1744;
   margin-bottom: 30px;
   animation: heartbeat 1.5s infinite;
+  word-wrap: break-word;
+  padding: 0 10px;
 }
 
 @keyframes heartbeat {
@@ -34,6 +42,8 @@
   color: #333;
   line-height: 1.8;
   margin-bottom: 40px;
+  word-wrap: break-word;
+  padding: 0 10px;
 }
 
 .buttons-container {
@@ -54,11 +64,16 @@
 .proposal-form {
   max-width: 700px;
   width: 100%;
+  box-sizing: border-box;
+  padding: 0 10px;
 }
 
 .success-card {
   max-width: 600px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20px;
 }
 
 .success-card h2 {
@@ -85,15 +100,24 @@
 
 @media (max-width: 768px) {
   .proposal-container {
+    padding: 15px 10px 70px 10px;
+  }
+  
+  .proposal-card,
+  .success-card,
+  .proposal-form {
     padding: 15px;
+    width: calc(100% - 20px);
   }
   
   .proposal-title {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
+    padding: 0 5px;
   }
   
   .proposal-text {
     font-size: 1rem;
+    padding: 0 5px;
   }
   
   .buttons-container {
@@ -107,10 +131,12 @@
   
   .link-box {
     flex-direction: column;
+    width: 100%;
   }
   
   .link-box input {
     min-width: 100%;
+    width: 100%;
   }
   
   .proposal-card {
@@ -119,15 +145,39 @@
 }
 
 @media (max-width: 480px) {
+  .proposal-container {
+    padding: 10px 5px 60px 5px;
+  }
+  
+  .proposal-card,
+  .success-card,
+  .proposal-form {
+    padding: 10px;
+    width: calc(100% - 10px);
+  }
+  
   .proposal-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+    padding: 0 5px;
+    margin-bottom: 20px;
   }
   
   .proposal-text {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    padding: 0 5px;
+    margin-bottom: 30px;
   }
   
   .hint-text {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    padding: 0 5px;
+  }
+  
+  .buttons-container {
+    gap: 10px;
+  }
+  
+  .success-card h2 {
+    font-size: 1.5rem;
   }
 }

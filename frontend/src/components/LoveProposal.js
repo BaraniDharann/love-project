@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import FloatingHearts from './FloatingHearts';
 import Footer from './Footer';
+import config from '../config';
 import './LoveProposal.css';
 
 function LoveProposal() {
@@ -13,11 +14,10 @@ function LoveProposal() {
   const [songs, setSongs] = useState([]);
   const [link, setLink] = useState('');
   const [previewAudio, setPreviewAudio] = useState(null);
-  const [uploadedPhoto, setUploadedPhoto] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/songs')
+    axios.get(`${config.API_URL}/api/songs`)
       .then(res => setSongs(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -25,31 +25,19 @@ function LoveProposal() {
   useEffect(() => {
     if (selectedSong && step === 1) {
       if (previewAudio) previewAudio.pause();
-      const audio = new Audio(`http://localhost:5000/songs/${selectedSong}`);
+      const audio = new Audio(`${config.API_URL}/songs/${selectedSong}`);
       audio.volume = 0.3;
-      audio.loop = true;
-      audio.play().catch(err => console.log('Preview play:', err));
+      audio.play().then(() => {
+        setTimeout(() => {
+          audio.pause();
+        }, 60000);
+      }).catch(err => console.log('Preview play:', err));
       setPreviewAudio(audio);
     }
     return () => {
       if (previewAudio) previewAudio.pause();
     };
-  }, [selectedSong, step, previewAudio]);
-
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formDataObj = new FormData();
-    formDataObj.append('photos', file);
-
-    try {
-      const res = await axios.post('http://localhost:5000/api/upload', formDataObj);
-      setUploadedPhoto(res.data.files[0]);
-    } catch (err) {
-      alert('Error uploading photo');
-    }
-  };
+  }, [selectedSong, step]);
 
   const handleCreateProposal = async () => {
     if (!message || !selectedSong) {
@@ -62,11 +50,11 @@ function LoveProposal() {
       email: localStorage.getItem('userEmail'),
       message,
       song: selectedSong,
-      photos: uploadedPhoto ? [uploadedPhoto] : []
+      photos: []
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/create', data);
+      const res = await axios.post(`${config.API_URL}/api/create`, data);
       setLink(res.data.link);
       setStep(2);
     } catch (err) {
@@ -119,22 +107,6 @@ function LoveProposal() {
             rows="6"
           />
         </div>
-
-        <div className="input-group">
-          <label>Upload a Photo (Optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoUpload}
-            className="file-input"
-          />
-        </div>
-
-        {uploadedPhoto && (
-          <div className="photo-preview">
-            <img src={`http://localhost:5000${uploadedPhoto}`} alt="Preview" />
-          </div>
-        )}
 
         <div className="input-group">
           <label>Select a Romantic Song</label>

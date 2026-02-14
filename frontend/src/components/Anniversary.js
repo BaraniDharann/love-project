@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import FloatingHearts from './FloatingHearts';
 import Footer from './Footer';
+import config from '../config';
 import './Anniversary.css';
 
 function Anniversary() {
@@ -26,7 +27,7 @@ function Anniversary() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/songs')
+    axios.get(`${config.API_URL}/api/songs`)
       .then(res => setSongs(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -34,12 +35,13 @@ function Anniversary() {
   useEffect(() => {
     if (formData.selectedSong && showPreview) {
       if (previewAudio) previewAudio.pause();
-      const audio = new Audio(`http://localhost:5000/songs/${formData.selectedSong}`);
+      const audio = new Audio(`${config.API_URL}/songs/${formData.selectedSong}`);
       audio.volume = 0.3;
-      audio.loop = true;
-      setTimeout(() => {
-        audio.play().catch(err => console.log('Preview play:', err));
-      }, 1500);
+      audio.play().then(() => {
+        setTimeout(() => {
+          audio.pause();
+        }, 60000);
+      }).catch(err => console.log('Preview play:', err));
       setPreviewAudio(audio);
     }
     return () => {
@@ -59,7 +61,7 @@ function Anniversary() {
     files.forEach(file => formDataObj.append('photos', file));
 
     try {
-      const res = await axios.post('http://localhost:5000/api/upload', formDataObj);
+      const res = await axios.post(`${config.API_URL}/api/upload`, formDataObj);
       setUploadedPhotos(res.data.files);
     } catch (err) {
       alert('Error uploading photos');
@@ -91,7 +93,7 @@ function Anniversary() {
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/create', data);
+      const res = await axios.post(`${config.API_URL}/api/create`, data);
       setLink(res.data.link);
       setStep(3);
     } catch (err) {
@@ -201,7 +203,7 @@ function Anniversary() {
                     transition={{ delay: 1.5 + index * 0.15 }}
                     className="photo-item-grid"
                   >
-                    <img src={`http://localhost:5000${photo}`} alt={`Memory ${index + 1}`} />
+                    <img src={`${config.API_URL}${photo}`} alt={`Memory ${index + 1}`} />
                   </motion.div>
                 ))}
               </div>
@@ -336,7 +338,7 @@ function Anniversary() {
         {uploadedPhotos.length > 0 && (
           <div className="photo-preview">
             {uploadedPhotos.map((photo, i) => (
-              <img key={i} src={`http://localhost:5000${photo}`} alt={`Preview ${i}`} />
+              <img key={i} src={`${config.API_URL}${photo}`} alt={`Preview ${i}`} />
             ))}
           </div>
         )}

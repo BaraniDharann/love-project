@@ -13,17 +13,17 @@ const generatePosterVideo = async (data, outputPath) => {
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
-      const songPath = data.songFolder === 'single-songs'
-        ? path.join(__dirname, '../../songs/single songs', data.selectedSong || data.song)
-        : path.join(__dirname, '../../songs', data.selectedSong || data.song);
+      const songPath = path.join(__dirname, 'songs', data.selectedSong || data.song);
 
       if (!fs.existsSync(songPath)) {
         return reject(new Error(`Song file not found: ${songPath}`));
       }
 
       const photos = data.photos && data.photos.length > 0
-        ? data.photos.filter(p => p && fs.existsSync(p.startsWith('http') ? p : path.join(__dirname, p)))
-          .map(p => p.startsWith('http') ? p : path.join(__dirname, p))
+        ? data.photos.filter(p => {
+            const photoPath = p.startsWith('/uploads/') ? path.join(__dirname, p) : p;
+            return fs.existsSync(photoPath);
+          }).map(p => p.startsWith('/uploads/') ? path.join(__dirname, p) : p)
         : [];
 
       const title = data.userName && data.partnerName 

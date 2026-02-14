@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import FloatingHearts from './FloatingHearts';
 import Footer from './Footer';
+import config from '../config';
 import './OnesideLove.css';
 
 function OnesideLove() {
@@ -25,9 +26,7 @@ function OnesideLove() {
 
   useEffect(() => {
     if (step === 2 && loveType) {
-      const endpoint = loveType === 'single' ? 'http://localhost:5000/api/single-songs' : 'http://localhost:5000/api/songs';
-      console.log('Fetching songs from:', endpoint, 'for loveType:', loveType);
-      axios.get(endpoint)
+      axios.get(`${config.API_URL}/api/songs`)
         .then(res => {
           console.log('Songs received:', res.data);
           setSongs(res.data);
@@ -41,21 +40,19 @@ function OnesideLove() {
   useEffect(() => {
     if (formData.selectedSong && showPreview) {
       if (previewAudio) previewAudio.pause();
-      const songPath = loveType === 'single' 
-        ? `http://localhost:5000/single-songs/${formData.selectedSong}`
-        : `http://localhost:5000/songs/${formData.selectedSong}`;
-      const audio = new Audio(songPath);
+      const audio = new Audio(`${config.API_URL}/songs/${formData.selectedSong}`);
       audio.volume = 0.3;
-      audio.loop = true;
-      setTimeout(() => {
-        audio.play().catch(err => console.log('Preview play:', err));
-      }, 1500);
+      audio.play().then(() => {
+        setTimeout(() => {
+          audio.pause();
+        }, 60000);
+      }).catch(err => console.log('Preview play:', err));
       setPreviewAudio(audio);
     }
     return () => {
       if (previewAudio) previewAudio.pause();
     };
-  }, [showPreview, formData.selectedSong, loveType]);
+  }, [showPreview, formData.selectedSong]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -69,7 +66,7 @@ function OnesideLove() {
     formDataObj.append('photos', file);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/upload', formDataObj);
+      const res = await axios.post(`${config.API_URL}/api/upload`, formDataObj);
       setUploadedPhoto(res.data.files[0]);
     } catch (err) {
       alert('Error uploading photo');
@@ -99,11 +96,11 @@ function OnesideLove() {
       loveType,
       ...formData,
       photo: uploadedPhoto,
-      songFolder: loveType === 'single' ? 'single-songs' : 'songs'
+      songFolder: 'songs'
     };
 
     try {
-      const res = await axios.post('http://localhost:5000/api/create', data);
+      const res = await axios.post(`${config.API_URL}/api/create`, data);
       setLink(res.data.link);
       setStep(3);
     } catch (err) {
@@ -141,38 +138,194 @@ function OnesideLove() {
   }
 
   if (showPreview) {
+    const titleWords = loveType === 'oneside' 
+      ? `A Message for ${formData.partnerName}`.split(' ')
+      : 'Forever Single & Fabulous'.split(' ');
+    
+    const feelingsText = formData.feelings || '';
+    const feelingsChars = feelingsText.split('');
+
     return (
       <div className="oneside-container preview-mode">
         <FloatingHearts count={35} />
+        <div className="animated-background">
+          <div className="love-word" style={{top: '10%', left: '5%', animationDelay: '0s'}}>Desire</div>
+          <div className="love-word" style={{top: '20%', left: '8%', animationDelay: '0.5s'}}>Devotion</div>
+          <div className="love-word" style={{top: '40%', left: '3%', animationDelay: '1s'}}>Precious</div>
+          <div className="love-word" style={{top: '60%', left: '6%', animationDelay: '1.5s'}}>Beautiful</div>
+          <div className="love-word" style={{top: '80%', left: '10%', animationDelay: '2s'}}>Love</div>
+          <div className="love-word" style={{top: '15%', right: '5%', animationDelay: '0.3s'}}>Affection</div>
+          <div className="love-word" style={{top: '25%', right: '8%', animationDelay: '0.8s'}}>Passion</div>
+          <div className="love-word" style={{top: '45%', right: '3%', animationDelay: '1.3s'}}>Cherish</div>
+          <div className="love-word" style={{top: '65%', right: '6%', animationDelay: '1.8s'}}>Beloved</div>
+          <div className="love-word" style={{top: '85%', right: '10%', animationDelay: '2.3s'}}>Forever</div>
+          <div className="love-word" style={{top: '30%', left: '12%', animationDelay: '0.6s'}}>Adore</div>
+          <div className="love-word" style={{top: '50%', left: '10%', animationDelay: '1.1s'}}>Darling</div>
+          <div className="love-word" style={{top: '35%', right: '12%', animationDelay: '0.9s'}}>Treasure</div>
+          <div className="love-word" style={{top: '55%', right: '15%', animationDelay: '1.4s'}}>Sweetheart</div>
+          <div className="love-word" style={{top: '70%', left: '15%', animationDelay: '1.6s'}}>Soulmate</div>
+          <div className="love-word" style={{top: '75%', right: '18%', animationDelay: '1.9s'}}>Angel</div>
+        </div>
         <div className="preview-content">
           {loveType === 'oneside' ? (
             <>
-              <motion.h1
-                initial={{ opacity: 0, y: -50 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="preview-title"
-              >
-                💔 My Feelings for {formData.partnerName} 💔
-              </motion.h1>
+              <motion.div className="title-container">
+                <motion.div className="heart-icon"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: 1, type: "spring" }}
+                >
+                  💔
+                </motion.div>
+                <h1 className="preview-title">
+                  {titleWords.map((word, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0, y: 50, rotateX: 90 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                      transition={{ delay: i * 0.15, duration: 0.6, type: "spring" }}
+                      className="word-reveal"
+                    >
+                      {word}{' '}
+                    </motion.span>
+                  ))}
+                </h1>
+                <motion.div className="heart-icon"
+                  initial={{ scale: 0, rotate: 180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: 1, type: "spring", delay: 0.3 }}
+                >
+                  💔
+                </motion.div>
+              </motion.div>
 
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.8 }}
                 className="feelings-box"
               >
-                <h3>What I Want to Say...</h3>
-                <p>{formData.feelings}</p>
+                <motion.h3
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.3, duration: 0.6 }}
+                >
+                  💌 What I Want to Say... 💌
+                </motion.h3>
+                <p className="feelings-text">
+                  {feelingsChars.map((char, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.6 + (i * 0.02), duration: 0.1 }}
+                      className="char-fade"
+                    >
+                      {char}
+                    </motion.span>
+                  ))}
+                </p>
               </motion.div>
 
               {uploadedPhoto && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="photo-display"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 2.5, duration: 1 }}
+                  className="photo-display romantic"
                 >
-                  <img src={`http://localhost:5000${uploadedPhoto}`} alt="Memory" />
+                  <motion.div 
+                    className="heart-shape"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 3, duration: 1.5, type: "spring" }}
+                  >
+                    <motion.div 
+                      className="puzzle-container"
+                      initial={{ opacity: 1 }}
+                      animate={{ opacity: 0 }}
+                      transition={{ delay: 5.5, duration: 0.5 }}
+                    >
+                      {[...Array(25)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="puzzle-piece"
+                          initial={{ 
+                            opacity: 0,
+                            x: (i % 5 < 2 ? -1 : 1) * (300 + Math.random() * 200),
+                            y: (Math.floor(i / 5) < 2 ? -1 : 1) * (300 + Math.random() * 200),
+                            scale: 0.3
+                          }}
+                          animate={{ 
+                            opacity: 1,
+                            x: 0,
+                            y: 0,
+                            scale: 1
+                          }}
+                          transition={{ 
+                            delay: 3.5 + (i * 0.08),
+                            duration: 1.5,
+                            type: "spring",
+                            stiffness: 80
+                          }}
+                          style={{
+                            backgroundImage: `url(${config.API_URL}${uploadedPhoto})`,
+                            backgroundPosition: `${(i % 5) * 25}% ${(Math.floor(i / 5) * 25) + 20}%`,
+                            backgroundSize: '500% 500%'
+                          }}
+                        />
+                      ))}
+                    </motion.div>
+                    <motion.div 
+                      className="heart-reveal"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 5.5, duration: 1.5 }}
+                      style={{ backgroundImage: `url(${config.API_URL}${uploadedPhoto})` }}
+                    />
+                  </motion.div>
+                  
+                  <div className="heart-icons-container">
+                    {[...Array(20)].map((_, i) => {
+                      const angle = (i / 20) * 360;
+                      const distance = 400;
+                      const x = Math.cos(angle * Math.PI / 180) * distance;
+                      const y = Math.sin(angle * Math.PI / 180) * distance;
+                      
+                      return (
+                        <motion.div
+                          key={i}
+                          className="floating-heart-icon"
+                          initial={{ 
+                            opacity: 0,
+                            x: x,
+                            y: y,
+                            scale: 0
+                          }}
+                          animate={{ 
+                            opacity: 1,
+                            x: x * 0.35,
+                            y: y * 0.35,
+                            scale: 1
+                          }}
+                          transition={{ 
+                            delay: 5.5 + (i * 0.1),
+                            duration: 2,
+                            type: "spring"
+                          }}
+                        >
+                          💕
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  
+                  <motion.div 
+                    className="photo-glow"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 6, duration: 1 }}
+                  />
                 </motion.div>
               )}
             </>
@@ -193,7 +346,7 @@ function OnesideLove() {
                   transition={{ delay: 0.5 }}
                   className="photo-display stylish"
                 >
-                  <img src={`http://localhost:5000${uploadedPhoto}`} alt="Me" />
+                  <img src={`${config.API_URL}${uploadedPhoto}`} alt="Me" />
                 </motion.div>
               )}
 
@@ -221,7 +374,12 @@ function OnesideLove() {
             </>
           )}
 
-          <div className="preview-actions">
+          <motion.div 
+            className="preview-actions"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 5, duration: 0.8 }}
+          >
             <button onClick={() => {
               if (previewAudio) {
                 previewAudio.pause();
@@ -234,7 +392,7 @@ function OnesideLove() {
             <button onClick={handleCreate} className="btn btn-accept">
               Confirm & Create Link
             </button>
-          </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -380,7 +538,7 @@ function OnesideLove() {
 
         {uploadedPhoto && (
           <div className="photo-preview">
-            <img src={`http://localhost:5000${uploadedPhoto}`} alt="Preview" />
+            <img src={`${config.API_URL}${uploadedPhoto}`} alt="Preview" />
           </div>
         )}
 
