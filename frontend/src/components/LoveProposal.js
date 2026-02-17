@@ -24,7 +24,6 @@ function LoveProposal() {
 
   useEffect(() => {
     if (selectedSong && step === 1) {
-      if (previewAudio) previewAudio.pause();
       const audio = new Audio(`${config.API_URL}/songs/${selectedSong}`);
       audio.volume = 0.3;
       audio.play().then(() => {
@@ -33,10 +32,10 @@ function LoveProposal() {
         }, 60000);
       }).catch(err => console.log('Preview play:', err));
       setPreviewAudio(audio);
+      return () => {
+        audio.pause();
+      };
     }
-    return () => {
-      if (previewAudio) previewAudio.pause();
-    };
   }, [selectedSong, step]);
 
   const handleCreateProposal = async () => {

@@ -39,7 +39,6 @@ function OnesideLove() {
 
   useEffect(() => {
     if (formData.selectedSong && showPreview) {
-      if (previewAudio) previewAudio.pause();
       const audio = new Audio(`${config.API_URL}/songs/${formData.selectedSong}`);
       audio.volume = 0.3;
       audio.play().then(() => {
@@ -48,11 +47,11 @@ function OnesideLove() {
         }, 60000);
       }).catch(err => console.log('Preview play:', err));
       setPreviewAudio(audio);
+      return () => {
+        audio.pause();
+      };
     }
-    return () => {
-      if (previewAudio) previewAudio.pause();
-    };
-  }, [showPreview, formData.selectedSong, previewAudio]);
+  }, [showPreview, formData.selectedSong]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
