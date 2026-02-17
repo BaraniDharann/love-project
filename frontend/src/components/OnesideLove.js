@@ -21,7 +21,6 @@ function OnesideLove() {
   const [songs, setSongs] = useState([]);
   const [link, setLink] = useState('');
   const [showPreview, setShowPreview] = useState(false);
-  const [previewAudio, setPreviewAudio] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,7 +45,6 @@ function OnesideLove() {
           audio.pause();
         }, 60000);
       }).catch(err => console.log('Preview play:', err));
-      setPreviewAudio(audio);
       return () => {
         audio.pause();
       };
@@ -80,10 +78,6 @@ function OnesideLove() {
     if (loveType === 'single' && (!uploadedPhoto || !formData.selectedSong)) {
       alert('Please upload photo and select a song');
       return;
-    }
-    if (previewAudio) {
-      previewAudio.pause();
-      previewAudio.currentTime = 0;
     }
     setShowPreview(true);
   };
@@ -380,10 +374,6 @@ function OnesideLove() {
             transition={{ delay: 5, duration: 0.8 }}
           >
             <button onClick={() => {
-              if (previewAudio) {
-                previewAudio.pause();
-                previewAudio.currentTime = 0;
-              }
               setShowPreview(false);
             }} className="btn btn-primary">
               Edit

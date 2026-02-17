@@ -13,7 +13,6 @@ function LoveProposal() {
   const [selectedSong, setSelectedSong] = useState('');
   const [songs, setSongs] = useState([]);
   const [link, setLink] = useState('');
-  const [previewAudio, setPreviewAudio] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,7 +30,6 @@ function LoveProposal() {
           audio.pause();
         }, 60000);
       }).catch(err => console.log('Preview play:', err));
-      setPreviewAudio(audio);
       return () => {
         audio.pause();
       };
