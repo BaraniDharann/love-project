@@ -52,7 +52,7 @@ function OnesideLove() {
     return () => {
       if (previewAudio) previewAudio.pause();
     };
-  }, [showPreview, formData.selectedSong]);
+  }, [showPreview, formData.selectedSong, previewAudio]);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
